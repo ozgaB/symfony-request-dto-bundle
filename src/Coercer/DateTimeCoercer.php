@@ -42,7 +42,15 @@ class DateTimeCoercer implements CoercerInterface
                 if (null !== $format) {
                     $result = \DateTimeImmutable::createFromFormat($format->format, $val);
 
-                    return false !== $result ? $result : $val;
+                    if (false === $result) {
+                        return $val;
+                    }
+
+                    if (null !== $format->time) {
+                        $result = $result->modify($format->time);
+                    }
+
+                    return $result;
                 }
 
                 try {

@@ -24,6 +24,11 @@ Added new attributes to support the new composition based syntax.
 
 * Support for unserializable constraints (closures) via runtime resolution.
 
+* Added optional `time` argument to `#[Format]` to normalize the time-of-day of a
+  parsed date. Accepts a `Time` enum case (`StartOfDay`, `Midday`, `EndOfDay`) or any
+  valid `H:i:s` string; invalid strings are rejected at metadata warm-up. Non-breaking:
+  defaults to `null`, preserving the previous behavior.
+
 ## 2.x -> 3.0
 
 * Variables being coerced no longer validate constraints from type properties, unless

@@ -15,6 +15,7 @@ use DualMedia\DtoRequestBundle\Dto\Attribute\Limit as LimitAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\Offset as OffsetAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\OrderBy as OrderByAttribute;
 use DualMedia\DtoRequestBundle\Dto\Enum\ActionCondition;
+use DualMedia\DtoRequestBundle\Dto\Enum\Time;
 use DualMedia\DtoRequestBundle\Metadata\Model\Action;
 use DualMedia\DtoRequestBundle\Metadata\Model\AsDoctrineReference;
 use DualMedia\DtoRequestBundle\Metadata\Model\FindBy;
@@ -62,6 +63,24 @@ class MetaReflectorTest extends TestCase
         static::assertCount(1, $result);
         static::assertInstanceOf(Format::class, $result[0]);
         static::assertSame('Y-m-d', $result[0]->format);
+        static::assertNull($result[0]->time);
+    }
+
+    public function testFormatAttributeNormalizesTimeEnumToStringValue(): void
+    {
+        $result = $this->reflector->meta([new FormatAttribute('Y-m-d', Time::EndOfDay)]);
+        static::assertCount(1, $result);
+        static::assertInstanceOf(Format::class, $result[0]);
+        static::assertSame('Y-m-d', $result[0]->format);
+        static::assertSame('23:59:59', $result[0]->time);
+    }
+
+    public function testFormatAttributeKeepsCustomTimeString(): void
+    {
+        $result = $this->reflector->meta([new FormatAttribute('Y-m-d', '06:30:00')]);
+        static::assertCount(1, $result);
+        static::assertInstanceOf(Format::class, $result[0]);
+        static::assertSame('06:30:00', $result[0]->time);
     }
 
     public function testFromKeyAttribute(): void

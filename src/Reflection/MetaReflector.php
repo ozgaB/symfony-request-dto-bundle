@@ -18,6 +18,7 @@ use DualMedia\DtoRequestBundle\Dto\Attribute\WithAllowedEnum;
 use DualMedia\DtoRequestBundle\Dto\Attribute\WithErrorPath as WithErrorPathAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\WithLabelProcessor as WithLabelProcessorAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\WithObjectProvider as WithObjectProviderAttribute;
+use DualMedia\DtoRequestBundle\Dto\Enum\Time;
 use DualMedia\DtoRequestBundle\Metadata\Model\Action;
 use DualMedia\DtoRequestBundle\Metadata\Model\AllowedEnum;
 use DualMedia\DtoRequestBundle\Metadata\Model\AsDoctrineReference;
@@ -47,7 +48,10 @@ class MetaReflector
         foreach ($attributes as $attribute) {
             $item = match (true) {
                 $attribute instanceof FindByAttribute => new FindBy(!$attribute instanceof FindOneByAttribute),
-                $attribute instanceof FormatAttribute => new Format($attribute->format),
+                $attribute instanceof FormatAttribute => new Format(
+                    $attribute->format,
+                    $attribute->time instanceof Time ? $attribute->time->value : $attribute->time
+                ),
                 $attribute instanceof FromKeyAttribute => new FromKey(),
                 $attribute instanceof LimitAttribute => new Limit($attribute->count),
                 $attribute instanceof OffsetAttribute => new Offset($attribute->count),
