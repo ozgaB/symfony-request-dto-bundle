@@ -47,7 +47,7 @@ class DateTimeCoercer implements CoercerInterface
                     }
 
                     if (null !== $format->time) {
-                        $result = $result->modify($format->time);
+                        $result = $result->setTime($format->time->h, $format->time->i, $format->time->s);
                     }
 
                     return $result;

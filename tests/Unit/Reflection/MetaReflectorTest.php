@@ -66,21 +66,16 @@ class MetaReflectorTest extends TestCase
         static::assertNull($result[0]->time);
     }
 
-    public function testFormatAttributeNormalizesTimeEnumToStringValue(): void
+    public function testFormatAttributeConvertsTimeToInterval(): void
     {
+        // Conversion/validation is delegated to TimeUtils (covered in TimeUtilsTest);
+        // here we only assert the attribute's time is carried through as an interval.
         $result = $this->reflector->meta([new FormatAttribute('Y-m-d', Time::EndOfDay)]);
         static::assertCount(1, $result);
         static::assertInstanceOf(Format::class, $result[0]);
         static::assertSame('Y-m-d', $result[0]->format);
-        static::assertSame('23:59:59', $result[0]->time);
-    }
-
-    public function testFormatAttributeKeepsCustomTimeString(): void
-    {
-        $result = $this->reflector->meta([new FormatAttribute('Y-m-d', '06:30:00')]);
-        static::assertCount(1, $result);
-        static::assertInstanceOf(Format::class, $result[0]);
-        static::assertSame('06:30:00', $result[0]->time);
+        static::assertInstanceOf(\DateInterval::class, $result[0]->time);
+        static::assertSame('23:59:59', $result[0]->time->format('%H:%I:%S'));
     }
 
     public function testFromKeyAttribute(): void
