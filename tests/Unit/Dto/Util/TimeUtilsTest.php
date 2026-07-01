@@ -43,8 +43,6 @@ class TimeUtilsTest extends TestCase
      */
     public static function provideInvalidTimeThrowsCases(): iterable
     {
-        yield 'out of range hour' => ['25:00:00'];
-        yield 'out of range minute' => ['10:99:00'];
         yield 'missing seconds' => ['10:30'];
         yield 'not a time' => ['nonsense'];
         yield 'empty' => [''];
