@@ -8,6 +8,7 @@ use DualMedia\DtoRequestBundle\Coercer\DateTimeCoercer;
 use DualMedia\DtoRequestBundle\Coercer\StringCoercer;
 use DualMedia\DtoRequestBundle\Metadata\Model\Format;
 use DualMedia\DtoRequestBundle\Metadata\Model\Property;
+use DualMedia\DtoRequestBundle\Metadata\Model\Time;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +60,7 @@ class DateTimeCoercerTest extends TestCase
 
     public function testTimeStartOfDay(): void
     {
-        $result = $this->coercer->coerce($this->property([new Format('Y-m-d', new \DateInterval('PT0H0M0S'))]));
+        $result = $this->coercer->coerce($this->property([new Format('Y-m-d'), new Time(new \DateInterval('PT0H0M0S'))]));
         $coerced = ($result->coerce)('2024-01-15');
 
         static::assertInstanceOf(\DateTimeImmutable::class, $coerced);
@@ -68,7 +69,7 @@ class DateTimeCoercerTest extends TestCase
 
     public function testTimeMidday(): void
     {
-        $result = $this->coercer->coerce($this->property([new Format('Y-m-d', new \DateInterval('PT12H0M0S'))]));
+        $result = $this->coercer->coerce($this->property([new Format('Y-m-d'), new Time(new \DateInterval('PT12H0M0S'))]));
         $coerced = ($result->coerce)('2024-01-15');
 
         static::assertInstanceOf(\DateTimeImmutable::class, $coerced);
@@ -77,7 +78,7 @@ class DateTimeCoercerTest extends TestCase
 
     public function testTimeEndOfDay(): void
     {
-        $result = $this->coercer->coerce($this->property([new Format('Y-m-d', new \DateInterval('PT23H59M59S'))]));
+        $result = $this->coercer->coerce($this->property([new Format('Y-m-d'), new Time(new \DateInterval('PT23H59M59S'))]));
         $coerced = ($result->coerce)('2024-01-15');
 
         static::assertInstanceOf(\DateTimeImmutable::class, $coerced);
@@ -86,17 +87,28 @@ class DateTimeCoercerTest extends TestCase
 
     public function testCustomTime(): void
     {
-        $result = $this->coercer->coerce($this->property([new Format('Y-m-d', new \DateInterval('PT6H30M15S'))]));
+        $result = $this->coercer->coerce($this->property([new Format('Y-m-d'), new Time(new \DateInterval('PT6H30M15S'))]));
         $coerced = ($result->coerce)('2024-01-15');
 
         static::assertInstanceOf(\DateTimeImmutable::class, $coerced);
         static::assertSame('2024-01-15 06:30:15', $coerced->format('Y-m-d H:i:s'));
     }
 
+    public function testTimeAppliedWithoutFormatOnIsoString(): void
+    {
+        // #[Time] composes independently of #[Format]: it also overwrites the
+        // time of a plain ISO-parsed date.
+        $result = $this->coercer->coerce($this->property([new Time(new \DateInterval('PT0H0M0S'))]));
+        $coerced = ($result->coerce)('2024-01-15T10:30:45+00:00');
+
+        static::assertInstanceOf(\DateTimeImmutable::class, $coerced);
+        static::assertSame('2024-01-15 00:00:00', $coerced->format('Y-m-d H:i:s'));
+    }
+
     public function testTimeNotAppliedOnInvalidParse(): void
     {
         // Failed parse must return the original string regardless of the time value.
-        $result = $this->coercer->coerce($this->property([new Format('Y-m-d', new \DateInterval('PT12H0M0S'))]));
+        $result = $this->coercer->coerce($this->property([new Format('Y-m-d'), new Time(new \DateInterval('PT12H0M0S'))]));
         $coerced = ($result->coerce)('not-a-date');
 
         static::assertSame('not-a-date', $coerced);

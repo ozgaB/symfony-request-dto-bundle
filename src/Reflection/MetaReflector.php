@@ -13,6 +13,7 @@ use DualMedia\DtoRequestBundle\Dto\Attribute\FromKey as FromKeyAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\Limit as LimitAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\Offset as OffsetAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\OrderBy as OrderByAttribute;
+use DualMedia\DtoRequestBundle\Dto\Attribute\Time as TimeAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\ValidateWithGroups as ValidateWithGroupsAttribute;
 use DualMedia\DtoRequestBundle\Dto\Attribute\WithAllowedEnum;
 use DualMedia\DtoRequestBundle\Dto\Attribute\WithErrorPath as WithErrorPathAttribute;
@@ -29,6 +30,7 @@ use DualMedia\DtoRequestBundle\Metadata\Model\LabelProcessor;
 use DualMedia\DtoRequestBundle\Metadata\Model\Limit;
 use DualMedia\DtoRequestBundle\Metadata\Model\Offset;
 use DualMedia\DtoRequestBundle\Metadata\Model\OrderBy;
+use DualMedia\DtoRequestBundle\Metadata\Model\Time;
 use DualMedia\DtoRequestBundle\Metadata\Model\ValidateWithGroups;
 use DualMedia\DtoRequestBundle\Metadata\Model\WithErrorPath;
 use DualMedia\DtoRequestBundle\Metadata\Model\WithObjectProvider;
@@ -48,10 +50,8 @@ class MetaReflector
         foreach ($attributes as $attribute) {
             $item = match (true) {
                 $attribute instanceof FindByAttribute => new FindBy(!$attribute instanceof FindOneByAttribute),
-                $attribute instanceof FormatAttribute => new Format(
-                    $attribute->format,
-                    null === $attribute->time ? null : TimeUtils::toInterval($attribute->time)
-                ),
+                $attribute instanceof FormatAttribute => new Format($attribute->format),
+                $attribute instanceof TimeAttribute => new Time(TimeUtils::toInterval($attribute->value)),
                 $attribute instanceof FromKeyAttribute => new FromKey(),
                 $attribute instanceof LimitAttribute => new Limit($attribute->count),
                 $attribute instanceof OffsetAttribute => new Offset($attribute->count),

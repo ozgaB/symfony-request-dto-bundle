@@ -18,7 +18,7 @@ class TimeUtils
 
         if (false === ($parsed = \DateTimeImmutable::createFromFormat('!H:i:s', $value))) {
             throw new \InvalidArgumentException(sprintf(
-                'Invalid time "%s" passed to #[Format], expected an "H:i:s" time-of-day.',
+                'Invalid time "%s" passed to #[Time], expected an "H:i:s" time-of-day.',
                 $value
             ));
         }

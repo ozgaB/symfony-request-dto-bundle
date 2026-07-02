@@ -49,38 +49,41 @@ class AdvancedFilterDto extends AbstractDto
 }
 ```
 
-### Time normalization with `#[Format]`
+### Time normalization with `#[Time]`
 
 `\DateTimeImmutable::createFromFormat()` does **not** zero out missing time
 components — a date-only format inherits the server's current time
-(e.g. `2005-04-12 14:37:22` instead of a clean date). The optional `time`
-argument sets the time-of-day deterministically after a successful parse.
-It defaults to `null`, which leaves the parsed time untouched, so existing
-code is unaffected.
+(e.g. `2005-04-12 14:37:22` instead of a clean date). The `#[Time]` attribute
+overwrites the time-of-day of a parsed date. It composes independently of
+`#[Format]`: present means "set this time", absent means "leave it untouched",
+and it works on plain ISO dates too.
 
 Pass a `Time` enum case for the common presets, or any valid `H:i:s` string.
 Invalid time strings are rejected at metadata warm-up, not at request time.
 
+Because `#[Time]` and the `Time` enum share a short name, alias one on import.
+
 ```php
 use DualMedia\DtoRequestBundle\Dto\AbstractDto;
 use DualMedia\DtoRequestBundle\Dto\Attribute\Format;
-use DualMedia\DtoRequestBundle\Dto\Enum\Time;
+use DualMedia\DtoRequestBundle\Dto\Attribute\Time;
+use DualMedia\DtoRequestBundle\Dto\Enum\Time as TimePreset;
 
 class DateRangeDto extends AbstractDto
 {
-    #[Format('Y-m-d', time: Time::StartOfDay)] // -> 00:00:00
+    #[Format('Y-m-d')]
+    #[Time(TimePreset::StartOfDay)] // -> 00:00:00
     public \DateTimeImmutable|null $from = null;
 
-    #[Format('Y-m-d', time: Time::EndOfDay)]   // -> 23:59:59
+    #[Format('Y-m-d')]
+    #[Time(TimePreset::EndOfDay)]   // -> 23:59:59
     public \DateTimeImmutable|null $to = null;
 
-    #[Format('Y-m-d', time: Time::Midday)]     // -> 12:00:00
-    public \DateTimeImmutable|null $on = null;
-
-    #[Format('Y-m-d', time: '06:30:00')]       // -> 06:30:00 (custom H:i:s)
+    #[Format('Y-m-d')]
+    #[Time('06:30:00')]             // -> 06:30:00 (custom H:i:s)
     public \DateTimeImmutable|null $at = null;
 
-    #[Format('Y-m-d')]                         // -> unchanged (legacy behavior)
+    #[Format('Y-m-d')]              // -> time left untouched (no #[Time])
     public \DateTimeImmutable|null $raw = null;
 }
 ```
